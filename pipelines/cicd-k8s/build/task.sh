@@ -2,10 +2,10 @@
 
 set -xeu
 
-export VERSION=$(cat version/version)
-cp version/version docker-build/version
+#export VERSION=$(cat version/version)
+#cp version/version docker-build/version
 
-cd spring-music
+cd app
 ./gradlew clean assemble
 cd -
 
