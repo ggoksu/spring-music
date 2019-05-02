@@ -5,7 +5,7 @@ resources:
   source:
     uri: git@github.com:ggoksu/spring-music.git
     branch: master
-    private_key: ((git_key))
+#    private_key: ((git_key))
     paths:
     - pipelines/**
 
@@ -14,7 +14,7 @@ resources:
   source:
     uri: git@github.com:ggoksu/spring-music.git
     branch: master
-    private_key: ((git_key))
+#    private_key: ((git_key))
     ignore_paths:
     - version
     - pipelines/**
@@ -27,8 +27,8 @@ resources:
     uri: git@github.com:ggoksu/spring-music.git
     branch: master
     file: version
-    git_user: ((git_user))
-    private_key: ((git_key))
+#    git_user: ((git_user))
+#    private_key: ((git_key))
 
 - name: app-image
   type: docker-image
