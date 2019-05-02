@@ -13,6 +13,7 @@ cd -
 ls -al app-cicd/build/libs
 
 mv app-cicd/build/libs/app-cicd-1.0.jar docker-build
+echo "0.1.0" > docker-build/version
 
 cat << ---EOF > docker-build/Dockerfile
 FROM openjdk:8-jdk-alpine

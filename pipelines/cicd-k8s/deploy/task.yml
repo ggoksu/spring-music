@@ -8,7 +8,6 @@ image_resource:
 
 inputs:
 - name: app-cicd
-- name: version
 
 run:
   path: app-cicd/pipelines/cicd-k8s/deploy/task.sh
