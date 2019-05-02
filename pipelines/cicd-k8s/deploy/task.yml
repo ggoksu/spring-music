@@ -7,11 +7,11 @@ image_resource:
     repository: appbricks/automation-tools
 
 inputs:
-- name: spring-music-cicd
+- name: app-cicd
 - name: version
 
 run:
-  path: spring-music-cicd/pipelines/cicd-k8s/deploy/task.sh
+  path: app-cicd/pipelines/cicd-k8s/deploy/task.sh
 
 params:
   ENVIRONMENT:

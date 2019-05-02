@@ -8,14 +8,14 @@ image_resource:
     tag: 8-jdk-alpine
 
 inputs:
-- name: spring-music-cicd
-- name: spring-music
+- name: app-cicd
+- name: app
 - name: version
 
 outputs:
 - name: docker-build
 
 run:
-  path: spring-music-cicd/pipelines/cicd-k8s/build/task.sh
+  path: app-cicd/pipelines/cicd-k8s/build/task.sh
 
 params:

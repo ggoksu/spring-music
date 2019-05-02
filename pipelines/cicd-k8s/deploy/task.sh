@@ -43,9 +43,9 @@ if [[ $? -ne 0 ]]; then
 fi
 
 export VERSION=$(cat version/version)
-echo "Deploying to spring-music verion $VERSION to $ENVIRONMENT."
+echo "Deploying the app version $VERSION to $ENVIRONMENT."
 
-kubectl get deployment --namespace $ENVIRONMENT spring-music >/dev/null 2>&1
+kubectl get deployment --namespace $ENVIRONMENT $APP_NAME >/dev/null 2>&1
 if [[ $? -ne 0 ]]; then
 echo "Creating new deployment"
 
@@ -53,24 +53,24 @@ cat << ---EOF > deployment.yml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: spring-music
+  name: $APP_NAME
   namespace: $ENVIRONMENT
   labels:
-    app: spring-music
+    app: $APP_NAME
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: spring-music
+      app: $APP_NAME
   template:
     metadata:
       labels:
-        app: spring-music
+        app: $APP_NAME
     spec:
       imagePullSecrets:
       - name: harbor-cred
       containers:
-      - name: spring-music
+      - name: $APP_NAME
         image: $IMAGE_REPO:$VERSION
         imagePullPolicy: "Always"
         ports:
@@ -90,19 +90,19 @@ set +e
 else
 echo "updating existing deployment"
 
-kubectl set image deployment/spring-music spring-music=$IMAGE_REPO:$VERSION --namespace $ENVIRONMENT
+kubectl set image deployment/$APP_NAME $APP_NAME=$IMAGE_REPO:$VERSION --namespace $ENVIRONMENT
 fi
 
-kubectl get service --namespace $ENVIRONMENT spring-music >/dev/null 2>&1
+kubectl get service --namespace $ENVIRONMENT $APP_NAME >/dev/null 2>&1
 if [[ $? -ne 0 ]]; then
 
   cat << ---EOF > service.yml
 kind: Service
 metadata:
-  name: spring-music
+  name: $APP_NAME
   namespace: $ENVIRONMENT
   labels:
-    app: spring-music
+    app: $APP_NAME
 spec:
   type: LoadBalancer
   ports:
@@ -111,11 +111,11 @@ spec:
     targetPort: http
     protocol: TCP
   selector:
-    app: spring-music
+    app: $APP_NAME
 ---EOF
 
-  kubectl expose deployment spring-music --namespace $ENVIRONMENT --type=LoadBalancer --name=spring-music 
+  kubectl expose deployment $APP_NAME --namespace $ENVIRONMENT --type=LoadBalancer --name=$APP_NAME 
 fi
 
-SERVICE_ENDPOINT=$(kubectl get service --namespace $ENVIRONMENT spring-music -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-echo -e "\n\n**** Spring Music in environment '$ENVIRONMENT' available at: http://${SERVICE_ENDPOINT}:8080"
+SERVICE_ENDPOINT=$(kubectl get service --namespace $ENVIRONMENT $APP_NAME -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo -e "\n\n**** $APP_NAME in environment '$ENVIRONMENT' available at: http://${SERVICE_ENDPOINT}:8080"

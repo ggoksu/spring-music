@@ -1,95 +1,18 @@
 ---
-jobs:
-- name: build
-  plan:
-  - aggregate:
-    - get: spring-music-cicd
-    - get: spring-music
-      trigger: true
-    - get: version
-      params: {bump: minor}
-  - task: build-app
-    file: spring-music-cicd/pipelines/cicd-k8s/build/task.yml
-  - put: spring-music-image
-    params:
-      build: docker-build
-      tag: docker-build/version
-      tag_as_latest: true
-  - put: version
-    params: {file: version/version}
-
-- name: deploy-dev
-  plan:
-  - aggregate:
-    - get: spring-music-cicd
-    - get: version
-      trigger: true
-      passed: [build]
-  - task: deploy-app
-    file: spring-music-cicd/pipelines/cicd-k8s/deploy/task.yml
-    params: 
-      ENVIRONMENT: dev
-      PKS_CLUSTER_NAME: ((pks_cluster_name))
-      PKS_API_ENDPOINT: ((pks_api_endpoint))
-      PKS_USERNAME: ((pks_username))
-      PKS_PASSWORD: ((pks_password))
-      DOCKER_REGISTRY_SERVER: ((docker_insecure_registries))
-      DOCKER_REGISTRY_USERNAME: ((docker_registry_user))
-      DOCKER_REGISTRY_PASSWORD: ((docker_registry_pass))
-      IMAGE_REPO: ((docker_repository))
-      
-- name: deploy-test
-  plan:
-  - aggregate:
-    - get: spring-music-cicd
-    - get: version
-      passed: [build]
-  - task: deploy-app
-    file: spring-music-cicd/pipelines/cicd-k8s/deploy/task.yml
-    params: 
-      ENVIRONMENT: test
-      PKS_CLUSTER_NAME: ((pks_cluster_name))
-      PKS_API_ENDPOINT: ((pks_api_endpoint))
-      PKS_USERNAME: ((pks_username))
-      PKS_PASSWORD: ((pks_password))
-      DOCKER_REGISTRY_SERVER: ((docker_insecure_registries))
-      DOCKER_REGISTRY_USERNAME: ((docker_registry_user))
-      DOCKER_REGISTRY_PASSWORD: ((docker_registry_pass))
-      IMAGE_REPO: ((docker_repository))
-
-- name: deploy-prod
-  plan:
-  - aggregate:
-    - get: spring-music-cicd
-    - get: version
-      passed: [build]
-  - task: deploy-app
-    file: spring-music-cicd/pipelines/cicd-k8s/deploy/task.yml
-    params: 
-      ENVIRONMENT: prod
-      PKS_CLUSTER_NAME: ((pks_cluster_name))
-      PKS_API_ENDPOINT: ((pks_api_endpoint))
-      PKS_USERNAME: ((pks_username))
-      PKS_PASSWORD: ((pks_password))
-      DOCKER_REGISTRY_SERVER: ((docker_insecure_registries))
-      DOCKER_REGISTRY_USERNAME: ((docker_registry_user))
-      DOCKER_REGISTRY_PASSWORD: ((docker_registry_pass))
-      IMAGE_REPO: ((docker_repository))
-
 resources:
-- name: spring-music-cicd
+- name: app-cicd
   type: git
   source:
-    uri: git@github.com:hodeh/spring-music.git
+    uri: git@github.com:ggoksu/spring-music.git
     branch: master
     private_key: ((git_key))
     paths:
     - pipelines/**
 
-- name: spring-music
+- name: app
   type: git
   source:
-    uri: git@github.com:hodeh/spring-music.git
+    uri: git@github.com:ggoksu/spring-music.git
     branch: master
     private_key: ((git_key))
     ignore_paths:
@@ -101,16 +24,55 @@ resources:
   source:
     initial_version: 0.0.0
     driver: git
-    uri: git@github.com:hodeh/spring-music.git
+    uri: git@github.com:ggoksu/spring-music.git
     branch: master
     file: version
     git_user: ((git_user))
     private_key: ((git_key))
 
-- name: spring-music-image
+- name: app-image
   type: docker-image
   source:
     repository: ((docker_repository))
     insecure_registries: [ ((docker_insecure_registries)) ]
     username: ((docker_registry_user))
     password: ((docker_registry_pass))
+
+jobs:
+- name: build
+  plan:
+  - aggregate:
+    - get: app-cicd
+    - get: app
+      trigger: true
+    - get: version
+      params: {bump: minor}
+  - task: build-app
+    file: app-cicd/pipelines/cicd-k8s/build/task.yml
+  - put: app-image
+    params:
+      build: docker-build
+      tag: docker-build/version
+      tag_as_latest: true
+  - put: version
+    params: {file: version/version}
+
+- name: deploy
+  plan:
+  - aggregate:
+    - get: app-cicd
+    - get: version
+      passed: [build]
+  - task: deploy-app
+    file: app-cicd/pipelines/cicd-k8s/deploy/task.yml
+    params: 
+      ENVIRONMENT: prod
+      APP_NAME: sample-java-app
+      PKS_CLUSTER_NAME: ((pks_cluster_name))
+      PKS_API_ENDPOINT: ((pks_api_endpoint))
+      PKS_USERNAME: ((pks_username))
+      PKS_PASSWORD: ((pks_password))
+      DOCKER_REGISTRY_SERVER: ((docker_insecure_registries))
+      DOCKER_REGISTRY_USERNAME: ((docker_registry_user))
+      DOCKER_REGISTRY_PASSWORD: ((docker_registry_pass))
+      IMAGE_REPO: ((docker_repository))
