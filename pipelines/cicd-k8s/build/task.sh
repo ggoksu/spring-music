@@ -6,6 +6,7 @@ set -xeu
 #cp version/version docker-build/version
 
 cd app
+ls -la
 ./gradlew clean assemble
 cd -
 
