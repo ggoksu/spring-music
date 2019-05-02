@@ -71,7 +71,7 @@ spec:
       - name: harbor-cred
       containers:
       - name: $APP_NAME
-        image: $IMAGE_REPO:$VERSION
+        image: $IMAGE_REPO:0.1.0
         imagePullPolicy: "Always"
         ports:
         - containerPort: 8080
