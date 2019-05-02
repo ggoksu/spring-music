@@ -10,9 +10,9 @@ ls -la
 ./gradlew clean assemble
 cd -
 
-ls -al app/build/libs
+ls -al app-cicd/build/libs
 
-mv app/build/libs/app-1.0.jar docker-build
+mv app-cicd/build/libs/app-1.0.jar docker-build
 
 cat << ---EOF > docker-build/Dockerfile
 FROM openjdk:8-jdk-alpine
