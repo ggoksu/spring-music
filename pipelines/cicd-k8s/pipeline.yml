@@ -3,7 +3,7 @@ resources:
 - name: app-cicd
   type: git
   source:
-    uri: git@github.com:ggoksu/spring-music.git
+    uri: https://github.com/ggoksu/spring-music
     branch: master
 #    private_key: ((git_key))
     paths:
@@ -12,22 +12,8 @@ resources:
 - name: app
   type: git
   source:
-    uri: git@github.com:ggoksu/spring-music.git
+    uri: https://github.com/buildpack/sample-java-app
     branch: master
-#    private_key: ((git_key))
-    ignore_paths:
-    - version
-    - pipelines/**
-
-- name: version
-  type: semver
-  source:
-    initial_version: 0.0.0
-    driver: git
-    uri: git@github.com:ggoksu/spring-music.git
-    branch: master
-    file: version
-#    git_user: ((git_user))
 #    private_key: ((git_key))
 
 - name: app-image
@@ -45,8 +31,6 @@ jobs:
     - get: app-cicd
     - get: app
       trigger: true
-    - get: version
-      params: {bump: minor}
   - task: build-app
     file: app-cicd/pipelines/cicd-k8s/build/task.yml
   - put: app-image
@@ -54,19 +38,15 @@ jobs:
       build: docker-build
       tag: docker-build/version
       tag_as_latest: true
-  - put: version
-    params: {file: version/version}
-
 - name: deploy
   plan:
   - aggregate:
     - get: app-cicd
-    - get: version
       passed: [build]
   - task: deploy-app
     file: app-cicd/pipelines/cicd-k8s/deploy/task.yml
     params: 
-      ENVIRONMENT: prod
+      ENVIRONMENT: production
       APP_NAME: sample-java-app
       PKS_CLUSTER_NAME: ((pks_cluster_name))
       PKS_API_ENDPOINT: ((pks_api_endpoint))

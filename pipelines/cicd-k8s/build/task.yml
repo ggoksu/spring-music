@@ -10,7 +10,6 @@ image_resource:
 inputs:
 - name: app-cicd
 - name: app
-- name: version
 
 outputs:
 - name: docker-build
