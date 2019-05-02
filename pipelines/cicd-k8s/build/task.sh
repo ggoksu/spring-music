@@ -5,7 +5,7 @@ set -xeu
 #export VERSION=$(cat version/version)
 #cp version/version docker-build/version
 
-cd app
+cd app-cicd
 ls -la
 ./gradlew clean assemble
 cd -
